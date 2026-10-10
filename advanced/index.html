@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#152822"><title>AERIE / Living skies</title><link rel="stylesheet" href="styles.css"><script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script></head>
+<body>
+<canvas id="view" aria-label="Interactive 3D bird habitat"></canvas>
+<header><a class="brand" href="../index.html" title="Compare with the original"><span class="brand-icon">⌁</span> AERIE <span class="edition">FIELD SIMULATION / 02</span></a><div class="live"><i></i> LIVING SKIES <span id="fps">—</span></div></header>
+<section class="intro"><div class="eyebrow">A SMALL WORLD. A THOUSAND WINGS.</div><h1>The valley<br>is alive.</h1><p>Follow the flock. Change the weather.<br>See how a living sky responds.</p><div class="scene-label"><span>01</span> RIVER VALLEY <b id="clock">06:30</b></div></section>
+<aside id="panel"><div class="panel-title"><span>Observation deck</span><button id="collapse" aria-expanded="true" aria-controls="panel-body" title="Toggle controls">−</button></div><div id="panel-body">
+<div class="camera-tabs" role="group" aria-label="Camera"><button data-camera="valley" class="selected">Valley</button><button data-camera="flock">Flock</button><button data-camera="village">Village</button><button data-camera="orbit">Orbit</button></div>
+<label class="range-label" for="population">Bird population <output id="population-value">220</output></label><input id="population" type="range" min="60" max="700" step="20" value="220">
+<label class="range-label" for="speed">Flow of time <output id="speed-value">1×</output></label><input id="speed" type="range" min="0.25" max="3" step="0.25" value="1">
+<div class="range-label"><label for="weather">Weather system</label><span class="tiny">REGIONAL FRONTS</span></div><select id="weather"><option value="mixed">Living mosaic</option><option value="clear">Clear skies</option><option value="rain">Rain front</option><option value="snow">Snowfall</option><option value="fog">Valley mist</option><option value="storm">Thunderstorm</option></select>
+<label class="range-label" for="sun">Time of day <output id="sun-value">Dawn</output></label><input id="sun" type="range" min="0" max="24" step="0.1" value="6.5">
+<div class="actions"><button id="feed">＋ Place food</button><button id="hawk" aria-pressed="false">Release hawk</button></div><p id="hint">Drag to explore · scroll to zoom</p>
+<div class="transport"><button id="pause" class="primary">Ⅱ Pause</button><button id="reset" aria-label="Reset habitat">↺ Reset</button><button id="sound" aria-pressed="false" aria-label="Toggle ambient sound">Sound off</button></div>
+</div></aside>
+<footer><div class="metric"><b id="birds-stat">220</b><span>BIRDS IN FLIGHT</span></div><div class="metric"><b>3</b><span>SPECIES</span></div><div class="metric"><b id="wind-stat">—</b><span>WIND / RELATIVE</span></div><div class="footer-note">PROCEDURAL HABITAT<br><span>June 03, 2026 → October 10, 2026</span></div></footer>
+<div id="toast" role="status" aria-live="polite"></div><div id="error" hidden>WebGL is unavailable. Try a browser with hardware acceleration enabled, or <a href="../original/index.html">open the original 2D simulation</a>.</div>
+<script type="module" src="main.js"></script></body></html>
