@@ -18,6 +18,7 @@ export class VillageSimulation {
       y: 0, heading: 0, speed: 0, state: 'walk', phase: i * .73,
       goal: {x: 44 + i % 3 * 4, z: 35 - i % 4 * 3}, intent: 'forage',
       until: 0, commandUntil: 0, scaredUntil: 0, walkPhase: i * .73,
+      reaction: '', reactionUntil: 0, reactionCooldown: 0, lookX: 0, lookY: 0, lookZ: 0,
     }));
     for (const p of this.villagers) p.y = terrainHeight(p.x, p.z);
     this.initialSeed = this.seed;
@@ -81,7 +82,8 @@ export class VillageSimulation {
       const local = options.weatherSystem?.sample(p.x, p.z);
       const badWeather = local ? (local.rain > .28 || local.snow > .35)
         : ['storm', 'rain', 'snow'].includes(options.weather);
-      if (badWeather && p.scaredUntil <= this.time) {
+      if (badWeather) {
+        p.reaction='';p.reactionUntil=0;p.scaredUntil=0;
         const t = this.tents[p.home], a = p.id * 2.4;
         p.goal = {x: t.x + Math.cos(a) * .65, z: t.z + Math.sin(a) * .65};
         p.intent = 'shelter';
@@ -91,6 +93,25 @@ export class VillageSimulation {
       } else if ((p.state === 'forage' || p.state === 'campfire') && this.time > p.until) {
         this.chooseActivity(p, options.daylight ?? 1);
       } else if (p.intent === 'gather' && this.time > p.commandUntil) this.chooseActivity(p, options.daylight ?? 1);
+
+      const visitor=options.visitor;
+      if(!badWeather&&visitor&&this.time>=p.reactionCooldown&&p.intent!=='flee'){
+        const distance=Math.hypot(visitor.x-p.x,visitor.z-p.z),height=visitor.y-p.y;
+        const speed=visitor.speed??Math.hypot(visitor.vx||0,visitor.vy||0,visitor.vz||0);
+        if(distance<10&&height>-1&&height<8&&speed>14&&p.id%3!==2){
+          p.reactionCooldown=this.time+11+p.id*.3;
+          if(p.id%2){const a=Math.atan2(p.z-visitor.z,p.x-visitor.x)+.4;p.goal=this.dryPoint(p.x+Math.cos(a)*15,p.z+Math.sin(a)*15);p.intent='flee';p.scaredUntil=this.time+5;}
+          else {p.reaction='duck';p.reactionUntil=this.time+1.8;}
+        }else if(distance<18&&height>-2&&height<22&&(speed<9||visitor.chirpUntil>(visitor.time??this.time))){
+          p.reaction=visitor.chirpUntil>(visitor.time??this.time)?'wave':'watch';p.reactionUntil=this.time+(p.reaction==='wave'?3:4);p.reactionCooldown=this.time+10;
+        }
+      }
+      if(!badWeather&&p.reaction&&this.time<p.reactionUntil){
+        p.state=p.reaction;p.speed=0;
+        if(visitor){p.lookX=visitor.x;p.lookY=visitor.y;p.lookZ=visitor.z;p.heading=Math.atan2(visitor.x-p.x,visitor.z-p.z);}
+        p.y=terrainHeight(p.x,p.z);continue;
+      }
+      p.reaction='';
 
       let dx = p.goal.x - p.x, dz = p.goal.z - p.z, distance = Math.hypot(dx, dz);
       if (distance < .45) {

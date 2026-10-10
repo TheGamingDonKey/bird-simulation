@@ -1,5 +1,6 @@
 import { terrainHeight, riverX } from './terrain.js';
 import { VillageSimulation, villageTents } from './villagers.js';
+import { WildlifeSimulation } from './wildlife.js';
 
 // All scenery is made locally. A seeded stream keeps the valley identical on reload.
 export function createWorld(THREE, scene) {
@@ -7,6 +8,7 @@ export function createWorld(THREE, scene) {
   const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
   const root = new THREE.Group(); root.name = 'Living valley'; scene.add(root);
   const villageCenter = { x: 35, z: 20 };
+  const perches=[];
   const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true, ...extra });
   const mesh = (geometry, material, parent = root) => { const m = new THREE.Mesh(geometry, material); m.castShadow = m.receiveShadow = !material.transparent; parent.add(m); return m; };
   const dummy = new THREE.Object3D();
@@ -99,6 +101,8 @@ export function createWorld(THREE, scene) {
   const trunkGeo = new THREE.CylinderGeometry(0.34, 0.48, 1, 5);
   const coniferGeo = new THREE.ConeGeometry(1, 1, 6);
   const canopyGeo = new THREE.IcosahedronGeometry(1, 0);
+  const canopyVertices=canopyGeo.attributes.position;let crownVertex=0;
+  for(let i=1;i<canopyVertices.count;i++)if(canopyVertices.getY(i)>canopyVertices.getY(crownVertex))crownVertex=i;
   const trunks = new THREE.InstancedMesh(trunkGeo, mat(0x685541), 760);
   const needles = new THREE.InstancedMesh(coniferGeo, mat(0x45694f), 1380);
   const leaves = new THREE.InstancedMesh(canopyGeo, mat(0x6c8b53), 520);
@@ -120,9 +124,11 @@ export function createWorld(THREE, scene) {
       green.setHSL(0.35 + rand() * 0.07, 0.2 + rand() * 0.15, 0.22 + rand() * 0.12);
       instance(needles, needleCount++, x, y + h * 0.58, z, w, h * 0.76, w, rotation, green);
       instance(needles, needleCount++, x, y + h * 0.78, z, w * 0.73, h * 0.53, w * 0.73, rotation, green);
+      perches.push({id:`tree-${perches.length}`,type:'tree',x,y:y+h*1.045,z,radius:.7,label:'Conifer crown',source:'Wind bent conifers',instance:needleCount-1});
     } else if (leafCount < 520) {
       green.setHSL(0.22 + rand() * 0.13, 0.25 + rand() * 0.18, 0.35 + rand() * 0.13);
       instance(leaves, leafCount++, x, y + h * 0.72, z, w * 1.35, h * 0.43, w * 1.2, rotation, green);
+      const ox=canopyVertices.getX(crownVertex)*w*1.35,oz=canopyVertices.getZ(crownVertex)*w*1.2;perches.push({id:`tree-${perches.length}`,type:'tree',x:x+ox*Math.cos(rotation)+oz*Math.sin(rotation),y:y+h*.72+canopyVertices.getY(crownVertex)*h*.43,z:z-ox*Math.sin(rotation)+oz*Math.cos(rotation),radius:1.1,label:'Broadleaf crown',source:'Meadow tree crowns',instance:leafCount-1});
     }
   }
   trunks.count = trunkCount; needles.count = needleCount; leaves.count = leafCount;
@@ -195,6 +201,7 @@ export function createWorld(THREE, scene) {
   for (let i = 0; i < 6; i++) {
     const {x, z, rotation} = tentSites[i];
     const tent = new THREE.Group(); tent.name = `Canvas shelter ${i + 1}`; tent.position.set(x, terrainHeight(x, z) + 0.15, z); tent.rotation.y = rotation; root.add(tent); tents.push(tent);
+    perches.push({id:`tent-${i}`,type:'tent',x,y:tent.position.y+4.15,z,radius:.7,label:`Shelter ${i+1} ridge`,source:tent.name});
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute([-3,0,-3.8, 0,4.1,-3.8, -3,0,3.8, 0,4.1,-3.8,0,4.1,3.8,-3,0,3.8, 0,4.1,-3.8,3,0,-3.8,0,4.1,3.8, 3,0,-3.8,3,0,3.8,0,4.1,3.8, -3,0,-3.8,3,0,-3.8,0,4.1,-3.8],3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute([0,0,1,0,0,1,1,0,1,1,0,1,0,0,1,0,0,1,1,0,1,1,0,1,0,0,1,0,.5,1],2)); g.computeVertexNormals();
@@ -220,7 +227,7 @@ export function createWorld(THREE, scene) {
     const person = new THREE.Group(); person.name = `Villager ${i + 1}`; person.userData.villagerId = i; root.add(person); const clothes = mat([0x8e7357,0xbca981,0x8c9370,0x986e4f][i%4]);
     const body = mesh(new THREE.CylinderGeometry(0.32,0.4,0.9,5), clothes, person); body.position.y=1.4;
     const head=mesh(headGeometry,skin,person);head.position.y=2.09;
-    const cap=mesh(new THREE.SphereGeometry(.29,6,4,0,Math.PI*2,0,Math.PI*.5),hair,person);cap.position.y=2.16;
+    const cap=mesh(new THREE.SphereGeometry(.29,6,4,0,Math.PI*2,0,Math.PI*.5),hair,head);cap.position.y=.07;
     const limbs=[];
     for(let j=0;j<4;j++){const pivot=new THREE.Group();person.add(pivot);const arm=j<2;pivot.position.set((j%2?1:-1)*(arm?.42:.18),arm?1.78:.99,0);const m=mesh(limbGeometry,arm?skin:clothes,pivot);m.position.y=-.43;limbs.push(pivot);}
     people.push({person,limbs,body,head});
@@ -245,6 +252,41 @@ export function createWorld(THREE, scene) {
   const sparksGeometry=new THREE.BufferGeometry(), sparkPositions=new Float32Array(60*3);
   sparksGeometry.setAttribute('position',new THREE.BufferAttribute(sparkPositions,3));
   const sparks=new THREE.Points(sparksGeometry,new THREE.PointsMaterial({color:0xffc466,size:.16,transparent:true,opacity:.8,depthWrite:false}));root.add(sparks);
+
+  // Nine instanced batches cover all wildlife, including articulated deer legs.
+  const wildlifeSimulation=new WildlifeSimulation({groves:perches.filter(p=>p.type==='tree')});
+  const animalBodyGeo=new THREE.IcosahedronGeometry(1,0),animalLegGeo=new THREE.CylinderGeometry(.075,.095,1,4);
+  const deerMaterial=mat(0x94704e),rabbitMaterial=mat(0xb6a28a),antlerMaterial=mat(0xccc0a0,{side:THREE.DoubleSide}),fishMaterial=mat(0x93b8ad,{metalness:.3,roughness:.35});
+  const animalBatch=(name,geometry,material,count)=>{const m=new THREE.InstancedMesh(geometry,material,count);m.name=name;m.castShadow=m.receiveShadow=true;m.frustumCulled=false;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);root.add(m);return m;};
+  const deerBodies=animalBatch('Deer bodies',animalBodyGeo,deerMaterial,8),deerHeads=animalBatch('Deer heads',animalBodyGeo,deerMaterial,8),deerLegs=animalBatch('Deer legs',animalLegGeo,deerMaterial,32);
+  const antlerGeo=new THREE.BufferGeometry();antlerGeo.setAttribute('position',new THREE.Float32BufferAttribute([-.04,0,0,-.08,.8,0,.04,0,0,-.08,.5,0,-.4,.88,0,-.04,.67,0,-.08,.7,0,.13,1.06,0,-.04,.87,0],3));antlerGeo.computeVertexNormals();
+  const deerAntlers=animalBatch('Deer antlers',antlerGeo,antlerMaterial,16),rabbitBodies=animalBatch('Rabbit bodies',animalBodyGeo,rabbitMaterial,12),rabbitEars=animalBatch('Rabbit ears',animalBodyGeo,rabbitMaterial,24);
+  const rabbitTails=animalBatch('Rabbit tails',animalBodyGeo,mat(0xd7c7ac),12),fishBodies=animalBatch('River fish',animalBodyGeo,fishMaterial,14);
+  const fishTailGeo=new THREE.BufferGeometry();fishTailGeo.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,-.25,0,-.45,.25,0,-.45],3));fishTailGeo.computeVertexNormals();
+  const fishTails=animalBatch('Fish fins',fishTailGeo,fishMaterial,14);fishBodies.castShadow=fishTails.castShadow=false;
+  const animalRoot=new THREE.Object3D(),animalPart=new THREE.Object3D(),animalMatrix=new THREE.Matrix4();
+  function animalPartAt(batch,index,x,y,z,sx,sy,sz,rx=0,rz=0){animalPart.position.set(x,y,z);animalPart.scale.set(sx,sy,sz);animalPart.rotation.set(rx,0,rz);animalPart.updateMatrix();animalMatrix.multiplyMatrices(animalRoot.matrix,animalPart.matrix);batch.setMatrixAt(index,animalMatrix);}
+  function animateWildlife(){
+    let di=0,ri=0,fi=0;
+    for(const a of wildlifeSimulation.animals){
+      const hop=a.type==='rabbit'&&a.speed>0?Math.max(0,Math.sin(a.phase))*.42:0;
+      animalRoot.position.set(a.x,a.y+hop,a.z);animalRoot.rotation.set(0,a.heading,0);animalRoot.updateMatrix();
+      if(a.type==='deer'){
+        const grazing=a.state==='graze'||a.state==='drink',dip=grazing?.45:0;
+        animalPartAt(deerBodies,di,0,1.38,0,.55,.63,1.02);animalPartAt(deerHeads,di,0,2.15-dip,.84,.32,.38,.48,grazing?.65:-.08);
+        for(let j=0;j<4;j++)animalPartAt(deerLegs,di*4+j,(j%2?1:-1)*.34,.65,(j<2?1:-1)*.62,1,1.28,1,a.speed>0?Math.sin(a.phase+(j%2?Math.PI:0)+(j<2?0:Math.PI))*.45:0);
+        for(let j=0;j<2;j++)animalPartAt(deerAntlers,di*2+j,(j?1:-1)*.22,2.42-dip,.84,.8,.8,.8,grazing?.65:0,(j?1:-1)*.24);
+        di++;
+      }else if(a.type==='rabbit'){
+        animalPartAt(rabbitBodies,ri,0,.36,0,.32,.37,.54,a.speed>0?Math.sin(a.phase)*.12:0);
+        for(let j=0;j<2;j++)animalPartAt(rabbitEars,ri*2+j,(j?1:-1)*.13,.87,.3,.09,.4,.11,a.state==='scatter'?-.55:-.13,(j?1:-1)*.14);
+        animalPartAt(rabbitTails,ri,0,.38,-.45,.15,.16,.15);ri++;
+      }else{
+        animalPartAt(fishBodies,fi,0,0,0,.16,.11,.56);animalPartAt(fishTails,fi,0,0,-.44,1,1,1,0,Math.sin(a.phase)*.3);fi++;
+      }
+    }
+    for(const m of [deerBodies,deerHeads,deerLegs,deerAntlers,rabbitBodies,rabbitEars,rabbitTails,fishBodies,fishTails])m.instanceMatrix.needsUpdate=true;
+  }
 
   // High, thin ivory banks stay behind the flock. Unlit color avoids stone-like dark facets.
   const cloudMaterial=new THREE.MeshBasicMaterial({color:0xf2f1e6,transparent:true,opacity:.48,depthWrite:false});
@@ -321,9 +363,12 @@ export function createWorld(THREE, scene) {
       const view=people[i],p=village.villagers[i],walking=p.speed>.01;
       view.person.position.set(p.x,p.y+(walking?Math.sin(p.walkPhase*2)*.035:0),p.z);view.person.rotation.y=p.heading;
       view.person.userData.state=p.state;
-      view.body.rotation.x=p.state==='forage'?.32:0;
-      for(let j=0;j<4;j++)view.limbs[j].rotation.x=walking?Math.sin(p.walkPhase+(j%2?Math.PI:0))*(j<2?.34:.52):p.state==='campfire'?(j<2?-.2:-.55):p.state==='forage'?(j<2?-.6+Math.sin(time*2+i)*.1:.08):p.state==='gather'?(j<2?-.25:0):0;
+      const watching=p.state==='watch'||p.state==='wave';
+      view.person.scale.y=p.state==='duck'?.6:1;view.body.rotation.x=p.state==='duck'?.55:p.state==='forage'?.32:0;
+      view.head.rotation.x=watching?-Math.min(.85,Math.atan2(p.lookY-p.y-2,Math.hypot(p.lookX-p.x,p.lookZ-p.z))):0;
+      for(let j=0;j<4;j++){view.limbs[j].rotation.z=p.state==='wave'&&j===1?-.7+Math.sin(time*7+i)*.35:0;view.limbs[j].rotation.x=p.state==='wave'&&j===1?-2:walking?Math.sin(p.walkPhase+(j%2?Math.PI:0))*(j<2?.34:.52):p.state==='duck'?(j<2?-1.4:.55):p.state==='campfire'?(j<2?-.2:-.55):p.state==='forage'?(j<2?-.6+Math.sin(time*2+i)*.1:.08):p.state==='gather'?(j<2?-.25:0):0;}
     }
+    animateWildlife();
     const localRain=options.weatherSystem?.sample(35,20).rain??(rainy?.8:0),fireStrength=1-localRain*.72;
     for(let i=0;i<flames.length;i++){const f=flames[i];f.scale.set((1+Math.sin(time*8+i)*.13)*fireStrength,(.7+Math.sin(time*6+i*1.7)*.24)*fireStrength,fireStrength);f.rotation.z=Math.sin(time*5+i)*.14;}
     fireLight.intensity=(22+Math.sin(time*13)*4+Math.sin(time*8)*3)*(1.8-daylight*.8)*fireStrength;
@@ -334,10 +379,10 @@ export function createWorld(THREE, scene) {
   }
   animate(0, {weather:'mixed', daylight:1});
   return {
-    root, terrain:land, villageCenter, terrainHeight, villagers:village.villagers, village,
+    root, terrain:land, villageCenter, terrainHeight, villagers:village.villagers, village, perches, wildlife:wildlifeSimulation.animals, wildlifeSimulation,
     interact(x,z,kind='gather') {return village.interact(x,z,kind);},
     scare(x,z) {return village.scare(x,z);},
-    reset() {village.reset();lastTime=0;animate(0,{weather:'mixed',daylight:1});},
-    update(dt,time,options={}) { if (!(dt>0)) return; village.step(dt,options); lastTime=Number.isFinite(time)?time:lastTime+dt; animate(lastTime,options); },
+    reset() {village.reset();wildlifeSimulation.reset();lastTime=0;animate(0,{weather:'mixed',daylight:1});},
+    update(dt,time,options={}) { if (!(dt>0)) return; village.step(dt,options);wildlifeSimulation.step(dt,options); lastTime=Number.isFinite(time)?time:lastTime+dt; animate(lastTime,options); },
   };
 }

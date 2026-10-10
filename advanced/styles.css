@@ -13,3 +13,15 @@ header #cinema{pointer-events:auto;font-size:9px;margin-left:18px}.live{margin-l
 
 @media(max-width:560px){aside{top:auto}}
 @media(max-height:450px){aside{top:65px;bottom:auto}}
+
+.pilot-start{width:100%;margin-bottom:12px;background:#e2c378;color:#263426;font-weight:bold;font-size:12px}.pilot-start[aria-pressed=true]{background:#bbd1a1}.pilot-start:hover{background:#f2d79c}
+#player-hud{position:fixed;bottom:115px;left:50%;transform:translateX(-50%);width:510px;max-width:calc(100vw - 42px);padding:14px 17px;background:#11281fea;border:1px solid #c6d6aa66;border-radius:5px;box-shadow:0 12px 35px #071d2440;backdrop-filter:blur(12px)}
+.pilot-heading{display:flex;align-items:center;justify-content:space-between;font-size:9px;letter-spacing:1.2px}.pilot-heading b{color:#e6ca88;letter-spacing:.3px}.pilot-heading button{padding:6px 9px;font-size:9px}.flight-metrics{display:flex;justify-content:space-between;gap:16px;font-size:7px;letter-spacing:1px;margin:14px 0}.flight-metrics b{display:block;font-family:Georgia,serif;font-size:20px;font-weight:normal;margin-top:5px;letter-spacing:0}.flight-metrics meter{display:block;width:76px;height:12px;margin-top:8px;accent-color:#d4dfaa}.perch-line{display:flex;gap:7px;align-items:center}.perch-line span{font-size:10px;line-height:1.5;flex:1;color:#cbd6ba}.perch-line button{font-size:10px;padding:9px}.perch-line #land-bird{background:#cbdca7;color:#263c29}.flight-help{font-size:9px;color:#c0c9b3;margin:12px 0 9px}.flight-pad{display:flex;gap:6px}.flight-pad button{flex:1;touch-action:none;user-select:none;padding:8px}.flight-pad button.held{background:#e2c378;color:#25382a}.flight-practice{display:flex;align-items:center;gap:7px;border-top:1px solid #d8e4be22;padding-top:10px;margin-top:10px}.flight-practice span{font-size:6px;letter-spacing:1px;margin-right:auto;color:#aabb9e}.flight-practice button{font-size:9px;padding:6px 9px}.clean #player-hud{display:none}.pilot-mode .intro{opacity:0}canvas#view:focus{outline:none}
+@media(max-width:1050px){#player-hud{left:20px;transform:none;width:calc(100vw - 295px);max-width:510px;bottom:105px}.flight-metrics{gap:10px}}
+@media(max-width:560px){.pilot-mode footer{display:none}#player-hud{left:12px;right:12px;width:auto;max-width:none;bottom:16px;padding:11px 12px}.pilot-mode aside{bottom:264px}.pilot-mode .minimap{bottom:auto;top:68px}.flight-help{font-size:8px}.flight-pad button{padding:9px 6px;font-size:10px}.flight-practice span{font-size:5px}.perch-line span{font-size:9px}.perch-line button{font-size:9px;padding:8px 7px}}
+@media(max-height:450px){#player-hud{bottom:12px;padding:10px 12px;max-height:calc(100vh - 80px);overflow:auto}.flight-metrics{margin:9px 0}.flight-help{margin:8px 0}.pilot-mode aside{top:65px;bottom:auto}.flight-practice{margin-top:7px;padding-top:7px}}
+
+@media(max-height:450px){.pilot-mode footer,.pilot-mode .minimap{display:none}}
+
+@media(max-width:560px){.pilot-mode aside{max-height:calc(100dvh - 340px)}.pilot-mode .panel-title{position:sticky;top:0;background:#142c23;z-index:1}}
+@media(max-height:450px){.pilot-mode aside{max-height:calc(100dvh - 120px)}}

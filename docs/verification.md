@@ -22,3 +22,14 @@ Public repository: https://github.com/TheGamingDonKey/bird-simulation. See publi
 - Optional sound was retained but not independently evaluated.
 
 - Final responsive checks at390×667 and 844×390: no horizontal overflow; panel bounds remain inside viewport. Mobile starts collapsed; expanding scrolls controls. Hide-interface/Escape restoration works even with button focus. Map travel exits flock-following; free movement verified from actual camera coordinates.
+
+## Playable bird and wildlife expansion checks
+
+- Player flight, energy/gliding, tree and tent approaches, terrain clearance, exact perch lock, takeoff, chirp cooldown, deterministic replay and bounds have behavioral coverage. Input tests cover held keys/buttons, form focus, one-shot actions and blur cleanup; view tests cover chase camera and matching landing guidance.
+- All 760 rendered trees and six tent ridges have real geometry anchors; integration coverage checks every tree crown and stable reset references. Eight deer, twelve rabbits and fourteen fish have seeded activity, local reactions, weather priority and bounded movement. NPC watch/wave/duck/flee responses stay local.
+- Live desktop browser: landed on a tent and tree, took off by holding Space, climbed with W, paused with P, resumed without changing frozen position, chirped on a roof and observed ten nearby villagers reacting. A held Flap button also took off. No browser errors during these checks; foreground preview reported about60FPS at220birds on Balanced.
+- Responsive flight HUD at390x667 and844x390 has no horizontal overflow. At390x667 expanded pilot panel top76/bottom403, HUDtop409/bottom651; header remains reachable. Short landscape hides footer/map while flying to avoid overlap.
+- Specialist review fixes: removed a150tree landing-anchor cap, aligned the green landing marker with physics height/reach limits, folded perch wings close to the body, bounded expanded phone controls, and cleared held actions when pausing.
+- Player controls advance at real-time speed while the environment time multiplier controls flock/weather/village simulation. Flight freezes while paused. It is assisted arcade flight; arbitrary building collisions and precise aerodynamics are outside this edition.
+
+Final release verification: `node --test tests/*.test.mjs` — 55 passed, zero failures. `node --check advanced/main.js` and `git diff --check` passed.

@@ -21,6 +21,14 @@ The current advanced edition adds free flight, ground walking, bird viewpoint an
 
 **Graphics:** Light disables shadows and lowers pixel density. Balanced uses 1024-pixel shadow maps; Ultra uses 2048-pixel shadow maps and up to 2× pixel density. These are rasterized shadows, not hardware ray tracing.
 
+## Playable bird expansion — October 10, 2026
+
+Take control of a golden bird with a chase camera. Steer, climb, dive, flap and glide; approach real tree crowns or tent ridges and land with assistance. Perching restores energy, and flapping takes off. Landing practice buttons move you near a tree or tent without counting as a landing. The flight dashboard and map track your bird. Held buttons support touch controls.
+
+Eight deer, twelve rabbits and fourteen river fish wander, graze, drink, shelter or scatter locally. Villagers watch a gentle visitor, wave at a chirp, duck or flee from close fast flybys. Weather shelter takes priority over curiosity.
+
+Choose **Take control of a bird**. W/S or ↑/↓ climbs/dives; A/D or ←/→ steers; Space flaps; Shift glides; L lands/cancels/takes off; F chirps; P pauses. Focus the scene after using form controls. **Near a tree** and **Near a tent** make landing easy to learn. Exit flight or choose a habitat camera to return to observing.
+
 ## Explore
 
 - Drag and scroll to orbit/zoom. Valley and Village frame the landscape; Flock flies alongside one species.
@@ -31,11 +39,11 @@ The current advanced edition adds free flight, ground walking, bird viewpoint an
 - Choose Free flight or Walk in Explore the valley. WASD / arrow keys move, drag to look, Shift boosts; Q/E changes altitude in flight. Bird viewpoint follows an individual; Cinematic tour circles the valley.
 - Click the map to travel. Gather/startle buttons arm a terrain click. Click near a person to read their activity.
 - Hide interface keeps the world unobstructed; Escape restores it. Enable the day/night checkbox to advance the sun.
-- Keyboard: Space pauses, H toggles the hawk, R resets, when a form control is not focused.
+- Keyboard: P pauses; Space also pauses outside player flight, H toggles the hawk, R resets, when a form control is not focused.
 
 ## Source map
 
-`advanced/model.js` owns deterministic flocking, species, weather forces, food and predator state. `weather.js` owns shared geographic fronts; `villagers.js` owns independent village behavior. `navigation.js` handles camera movement, `atmosphere.js` renders sky and lighting, `minimap.js` draws the map, and `audio.js` synthesizes sound. `terrain.js` supplies shared ground heights. `world.js` builds and animates the landscape, people, fire and local weather. `bird-view.js` draws wings/body instances; `main.js` owns the renderer, camera and controls. `index.html` and `styles.css` contain the interface. `server.mjs` is a local-only static server.
+`advanced/player-bird.js` owns player flight and landing; `flight-input.js` translates keys and held buttons; `player-view.js` renders your bird and chase camera; `wildlife.js` owns animal behavior. `advanced/model.js` owns deterministic flocking, species, weather forces, food and predator state. `weather.js` owns shared geographic fronts; `villagers.js` owns independent village behavior. `navigation.js` handles camera movement, `atmosphere.js` renders sky and lighting, `minimap.js` draws the map, and `audio.js` synthesizes sound. `terrain.js` supplies shared ground heights. `world.js` builds and animates the landscape, people, fire and local weather. `bird-view.js` draws wings/body instances; `main.js` owns the renderer, camera and controls. `index.html` and `styles.css` contain the interface. `server.mjs` is a local-only static server.
 
 Run behavioral tests with `node --test tests/*.test.mjs`. These check reproducibility, finite/bounded motion, terrain clearance, and interaction effects. Browser visual checks are documented in `docs/verification.md` when complete.
 
@@ -47,6 +55,7 @@ Three.js and OrbitControls retain their upstream MIT license; see `advanced/vend
 
 - [Original source archive](https://github.com/TheGamingDonKey/bird-simulation/commit/929e269ea552c62e8abc09bbef96e72afed40c3a): June 3 source, published October 10.
 - [First advanced edition](https://github.com/TheGamingDonKey/bird-simulation/commit/f0f29eae24c40ee3ef461f7c33a82a488866d997): October 10.
-- Current main: living world expansion, October 10.
+- [Living world expansion](https://github.com/TheGamingDonKey/bird-simulation/commit/7823c6317091f873d80ce0e65daff7224e2075b1): October 10.
+- Current main: playable bird and wildlife expansion, October 10.
 
-![Living valley](living-world-preview.jpg)
+![Your bird perched on a tent roof](playable-bird-preview.jpg)

@@ -1,11 +1,11 @@
 import * as THREE from './vendor/three.module.min.js';
 // Ridged feather outlines and forked tails remain readable at observation distance.
-function wingGeometry(){
+export function wingGeometry(){
  const outline=[[0,0,.28],[.72,.04,.35],[1.55,0,.23],[2.27,-.03,.02],[2.35,-.03,-.28],[1.98,-.03,-.3],[2.1,-.04,-.55],[1.62,-.04,-.5],[1.64,-.04,-.77],[1.13,-.02,-.62],[.64,0,-.61],[0,0,-.28]],positions=[];
  for(let i=0;i<outline.length;i++)positions.push(.8,.09,-.12,...outline[i],...outline[(i+1)%outline.length]);
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.computeVertexNormals();return g;
 }
-function tailGeometry(){
+export function tailGeometry(){
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([-.18,0,-.48,-.53,0,-1.52,0,.035,-1.12,-.18,0,-.48,0,.035,-1.12,.18,0,-.48,.18,0,-.48,0,.035,-1.12,.53,0,-1.52],3));g.computeVertexNormals();return g;
 }
 export function createBirdView(scene,max=700){
