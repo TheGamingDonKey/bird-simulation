@@ -1,4 +1,4 @@
-# Run only after creating an empty TheGamingDonKey/bird-simulation repository.
+# Publish future commits from the aligned local checkout to TheGamingDonKey/bird-simulation.
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 if (-not (Test-Path -LiteralPath '.git')) {

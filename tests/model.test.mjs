@@ -102,9 +102,44 @@ test('storm wind changes trajectories and invalid weather is rejected', () => {
 
 test('zero or invalid timestep leaves all simulation state unchanged', () => {
   const h = habitat();
-  const initial = structuredClone({ birds: h.birds, time: h.time });
+  const initial = structuredClone({ birds: h.birds, time: h.time, weather: h.weatherSystem });
   for (const dt of [0, -1, NaN, Infinity]) h.step(dt);
-  assert.deepEqual({ birds: h.birds, time: h.time }, initial);
+  assert.deepEqual(structuredClone({ birds: h.birds, time: h.time, weather: h.weatherSystem }), initial);
+});
+
+test('birds explore a wider sky and soaring species spend longer gliding at higher altitude', () => {
+  const h = habitat(11, 180); h.setWeather('clear');
+  const altitude = [0, 0, 0], gliding = [0, 0, 0];
+  let wide = false, observations = 0;
+  for (let i = 0; i < 1200; i++) {
+    h.step(.05);
+    if (i > 400 && i % 20 === 0) {
+      observations++;
+      for (const b of h.birds) {
+        altitude[b.species] += b.y;
+        if (b.flightState === 'glide') gliding[b.species]++;
+        if (Math.abs(b.x) > 212 || Math.abs(b.z) > 212) wide = true;
+        assert.ok(b.energy >= 0 && b.energy <= 1);
+      }
+    }
+  }
+  assert.ok(wide, 'birds should actually travel beyond the old bounds');
+  assert.ok(altitude[2] / (60 * observations) > altitude[0] / (60 * observations) + 22);
+  assert.ok(gliding[2] > gliding[0] * 1.5);
+  assert.ok(gliding[0] > 0 && gliding[2] < 60 * observations);
+});
+
+test('a passing local rain front lowers flight compared with identical birds outside the front', () => {
+  const wet = habitat(13, 1), dry = habitat(13, 1);
+  assert.ok(wet.weatherSystem && dry.weatherSystem, 'Habitat must own local weather');
+  const front = wet.weatherSystem.fronts.find(f => f.type === 'rain');
+  const dryFront = dry.weatherSystem.fronts.find(f => f.type === 'rain');
+  Object.assign(dryFront, { x: 250, z: 240 });
+  place(wet.birds[0], front.x, 45, front.z);
+  place(dry.birds[0], front.x, 45, front.z);
+  wet.step(.1); dry.step(.1);
+  assert.ok(wet.birds[0].vy < dry.birds[0].vy);
+  assert.equal(wet.weatherSystem.time, wet.time);
 });
 
 test('river is submerged while valley and edge mountains remain finite', () => {
@@ -124,8 +159,8 @@ test('700 birds stay finite, inside habitat, and above terrain through mixed wea
     h.step(1 / 30);
     if (i % 60 === 0) for (const b of h.birds) {
       for (const key of ['x', 'y', 'z', 'vx', 'vy', 'vz', 'phase']) assert.ok(Number.isFinite(b[key]), key);
-      assert.ok(Math.abs(b.x) <= 210 && Math.abs(b.z) <= 210);
-      assert.ok(b.y >= 7 && b.y <= 95);
+      assert.ok(Math.abs(b.x) <= 260 && Math.abs(b.z) <= 260);
+      assert.ok(b.y >= 7 && b.y <= 145);
       assert.ok(b.y >= terrain.terrainHeight(b.x, b.z) + 5);
       assert.ok(Math.hypot(b.vx, b.vy, b.vz) <= 35);
     }

@@ -1,8 +1,12 @@
 import { terrainHeight } from './terrain.js';
+import { WeatherSystem } from './weather.js';
 
 const WEATHER = new Set(['mixed', 'clear', 'rain', 'snow', 'fog', 'storm']);
 const CELL = 30;
-const SPEEDS = [13, 16, 20];
+const SPEEDS = [17, 15, 22];
+const ALTITUDES = [32, 51, 99];
+const FLAP_SECONDS = [4.6, 3.2, 1.8];
+const FLIGHT_SECONDS = [6.2, 7.4, 11.5];
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const cellKey = (x, y, z) => x + y * 32 + z * 1024;
 
@@ -30,7 +34,8 @@ export class Habitat {
     this.random = randomSource(seed);
     this.time = 0;
     this.weather = 'mixed';
-    this.wind = { x: 1.5, z: 0.5 };
+    this.weatherSystem = new WeatherSystem(seed);
+    this.wind = this.weatherSystem.wind;
     this.food = [];
     this.predator = { x: -60, y: 62, z: -40, active: false };
     this.birds.length = 0;
@@ -44,13 +49,16 @@ export class Habitat {
     while (this.birds.length < this.count) {
       const species = this.birds.length % 3;
       const angle = this.random() * Math.PI * 2;
-      const x = (species - 1) * 52 + (this.random() - 0.5) * 76;
-      const z = (this.random() - 0.5) * 180;
-      const y = 25 + species * 10 + this.random() * 18;
+      const x = (species - 1) * 62 + (this.random() - 0.5) * 150;
+      const z = (this.random() - 0.5) * 250;
+      const y = ALTITUDES[species] + (this.random() - .5) * 25;
       this.birds.push({
         x, y: Math.max(y, terrainHeight(x, z) + 10), z,
         vx: Math.cos(angle) * SPEEDS[species], vy: (this.random() - 0.5) * 2,
         vz: Math.sin(angle) * SPEEDS[species], species, phase: this.random() * Math.PI * 2,
+        subgroup: Math.floor(this.birds.length / 3) % 5, flightState: 'flap',
+        flightClock: this.random() * FLIGHT_SECONDS[species], energy: .65 + this.random() * .3,
+        turn: 0,
       });
     }
   }
@@ -58,6 +66,7 @@ export class Habitat {
   setWeather(mode) {
     if (!WEATHER.has(mode)) throw new RangeError(`Unknown weather: ${mode}`);
     this.weather = mode;
+    this.weatherSystem.setMode(mode);
   }
 
   addFood(x, z) {
@@ -82,10 +91,7 @@ export class Habitat {
   integrate(dt) {
     this.time += dt;
     const t = this.time;
-    const storm = this.weather === 'storm';
-    const strength = storm ? 8 : this.weather === 'rain' ? 3.5 : 1.5;
-    this.wind.x = strength * (1 + 0.35 * Math.sin(t * 0.7));
-    this.wind.z = strength * (0.3 + 0.3 * Math.cos(t * 0.53));
+    this.weatherSystem.step(dt);
     for (const food of this.food) food.life -= dt;
     this.food = this.food.filter(food => food.life > 0);
 
@@ -110,7 +116,8 @@ export class Habitat {
       if (!bucket) grid.set(key, bucket = []);
       bucket.push(i);
     }
-    const forces = new Float32Array(this.birds.length * 3);
+    if (!this._forces || this._forces.length < this.birds.length * 3) this._forces = new Float32Array(this.birds.length * 3);
+    const forces = this._forces, local = {};
     for (let i = 0; i < this.birds.length; i++) {
       const b = this.birds[i];
       const cx = Math.floor(b.x / CELL), cy = Math.floor(b.y / CELL), cz = Math.floor(b.z / CELL);
@@ -132,29 +139,41 @@ export class Habitat {
             if (d2 < 0.001) sx += i < j ? -8 : 8;
           }
           if (other.species === b.species) {
-            ax += other.vx; ay += other.vy; az += other.vz;
-            px += other.x; py += other.y; pz += other.z;
-            neighbors++;
+            const related = other.subgroup === b.subgroup ? 1 : .35;
+            ax += other.vx * related; ay += other.vy * related; az += other.vz * related;
+            px += other.x * related; py += other.y * related; pz += other.z * related;
+            neighbors += related;
           }
         }
       }
       let fx = sx * 2.1, fy = sy * 2.1, fz = sz * 2.1;
       if (neighbors) {
-        fx += (ax / neighbors - b.vx) * 0.8 + (px / neighbors - b.x) * 0.035;
-        fy += (ay / neighbors - b.vy) * 0.8 + (py / neighbors - b.y) * 0.035;
-        fz += (az / neighbors - b.vz) * 0.8 + (pz / neighbors - b.z) * 0.035;
+        const alignment = b.species === 1 ? .75 : .55;
+        const cohesion = b.species === 1 ? .028 : .02;
+        fx += (ax / neighbors - b.vx) * alignment + (px / neighbors - b.x) * cohesion;
+        fy += (ay / neighbors - b.vy) * alignment + (py / neighbors - b.y) * cohesion;
+        fz += (az / neighbors - b.vz) * alignment + (pz / neighbors - b.z) * cohesion;
       }
       // Different species share collision avoidance but form separate flocks.
-      fx += Math.sin(t * 0.27 + b.phase) * 0.7;
-      fz += Math.cos(t * 0.23 + b.phase) * 0.7;
-      const localWind = this.weather === 'mixed' ? (b.x < -45 ? 1.9 : b.x > 70 ? 0.45 : 1) : 1;
-      fx += this.wind.x * 0.34 * localWind;
-      fz += this.wind.z * 0.34 * localWind;
-      fy += ((storm ? 24 : 32) + b.species * 10 - b.y) * 0.045 - b.vy * 0.18;
+      this.weatherSystem.sample(b.x, b.z, local);
+      const rough = local.rain + local.snow * .65;
+      b.flightClock = (b.flightClock + dt) % FLIGHT_SECONDS[b.species];
+      b.flightState = hawk.active || rough > .65 || b.flightClock < FLAP_SECONDS[b.species] ? 'flap' : 'glide';
+      b.energy = clamp(b.energy + dt * (b.flightState === 'glide' ? .065 : -.025), 0, 1);
+      const wander = b.species === 0 ? 2.1 : b.species === 1 ? 1.3 : .85;
+      const heading = t * (b.species === 0 ? .52 : .19) + b.subgroup * 1.6;
+      fx += Math.sin(heading + b.x * .022 + b.z * .009) * wander;
+      fz += Math.cos(heading * .81 + b.z * .023) * wander;
+      fx += local.windX * .34; fz += local.windZ * .34;
+      const thermal = b.species === 2 ? Math.max(0, Math.sin(b.x * .023 + t * .07) * Math.cos(b.z * .018)) * 3.5 : 0;
+      const height = ALTITUDES[b.species] + Math.sin(t * .12 + b.subgroup * 1.5) * (b.species === 2 ? 17 : 9) - rough * 22;
+      fy += (height - b.y) * .065 - b.vy * .24 + thermal;
+      if (b.flightState === 'glide') fy -= .7;
+      else if (b.species === 0) fy += Math.sin(b.phase) * .8;
       // Soft turns near the edges, followed by a final collision guard below.
-      if (Math.abs(b.x) > 165) fx -= Math.sign(b.x) * (Math.abs(b.x) - 165) * 0.32;
-      if (Math.abs(b.z) > 165) fz -= Math.sign(b.z) * (Math.abs(b.z) - 165) * 0.32;
-      if (b.y > 80) fy -= (b.y - 80) * 0.6;
+      if (Math.abs(b.x) > 225) fx -= Math.sign(b.x) * (Math.abs(b.x) - 225) * .35;
+      if (Math.abs(b.z) > 225) fz -= Math.sign(b.z) * (Math.abs(b.z) - 225) * .35;
+      if (b.y > 132) fy -= (b.y - 132) * .6;
       const ground = Math.max(terrainHeight(b.x, b.z), terrainHeight(b.x + b.vx * 1.6, b.z + b.vz * 1.6));
       if (b.y < ground + 17) fy += (ground + 17 - b.y) * 1.4;
 
@@ -180,6 +199,7 @@ export class Habitat {
     }
     for (let i = 0; i < this.birds.length; i++) {
       const b = this.birds[i];
+      const previousHeading = Math.atan2(b.vx, b.vz);
       b.vx += forces[i * 3] * dt; b.vy += forces[i * 3 + 1] * dt; b.vz += forces[i * 3 + 2] * dt;
       const speed = Math.hypot(b.vx, b.vy, b.vz);
       const desired = SPEEDS[b.species] + (hawk.active ? 3 : 0);
@@ -188,17 +208,19 @@ export class Habitat {
       const scale = nextSpeed / (speed || 1);
       if (speed < 0.001) b.vz = 6;
       else { b.vx *= scale; b.vy *= scale; b.vz *= scale; }
+      const headingDelta = Math.atan2(Math.sin(Math.atan2(b.vx, b.vz) - previousHeading), Math.cos(Math.atan2(b.vx, b.vz) - previousHeading));
+      b.turn += (clamp(-headingDelta / dt * .8, -.7, .7) - b.turn) * Math.min(1, dt * 6);
       b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
       for (const axis of ['x', 'z']) {
-        if (Math.abs(b[axis]) > 210) {
-          b[axis] = clamp(b[axis], -210, 210);
+        if (Math.abs(b[axis]) > 260) {
+          b[axis] = clamp(b[axis], -260, 260);
           b[`v${axis}`] = -Math.sign(b[axis]) * Math.abs(b[`v${axis}`]);
         }
       }
       const floor = Math.max(7, terrainHeight(b.x, b.z) + 7);
       if (b.y < floor) { b.y = floor; b.vy = Math.max(2, Math.abs(b.vy)); }
-      if (b.y > 95) { b.y = 95; b.vy = -Math.abs(b.vy); }
-      b.phase = (b.phase + dt * (7 + b.species * 2 + (hawk.active ? 2 : 0))) % (Math.PI * 2);
+      if (b.y > 145) { b.y = 145; b.vy = -Math.abs(b.vy); }
+      b.phase = (b.phase + dt * (b.flightState === 'glide' ? 1.2 : [15, 11, 6][b.species]) * (hawk.active ? 1.3 : 1)) % (Math.PI * 2);
     }
   }
 

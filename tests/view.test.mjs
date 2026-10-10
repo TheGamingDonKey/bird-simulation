@@ -11,6 +11,29 @@ test('bird forward axis follows climbing velocity at any heading',()=>{
  const actual=new THREE.Vector3().setFromMatrixColumn(matrix,2).normalize(),expected=new THREE.Vector3(10,5,0).normalize();
  assert.ok(actual.dot(expected)>.999,'Bird body should aim along its 3D velocity');
 });
+test('polygon birds glide with spread wings, bank with signed turn and use five batches',()=>{
+ const scene=new THREE.Scene(),view=createBirdView(scene);
+ const b={x:0,y:20,z:0,vx:10,vy:5,vz:0,species:2,phase:0,flightClock:5,energy:.9,flightState:'glide',turn:.7};
+ const habitat={birds:[b],time:0,predator:{active:false,x:0,y:0,z:0}};
+ view.update(habitat);
+ const meshes=scene.children.filter(o=>o.isInstancedMesh);
+ assert.ok(meshes.length<=5);assert.equal(meshes.length,5);
+ assert.ok(meshes[1].geometry.attributes.position.count>3);
+ assert.ok(meshes.every(m=>m.castShadow));
+ const bodyMatrix=new THREE.Matrix4(),wingMatrix=new THREE.Matrix4();
+ meshes[0].getMatrixAt(0,bodyMatrix); meshes[1].getMatrixAt(0,wingMatrix);
+ assert.ok(new THREE.Vector3().setFromMatrixColumn(bodyMatrix,2).normalize().dot(new THREE.Vector3(10,5,0).normalize())>.999);
+ const positiveBank=new THREE.Vector3().setFromMatrixColumn(bodyMatrix,0).normalize();
+ b.turn=-.7;view.update(habitat);meshes[0].getMatrixAt(0,bodyMatrix);
+ const negativeBank=new THREE.Vector3().setFromMatrixColumn(bodyMatrix,0).normalize();
+ assert.ok(positiveBank.y>0&&negativeBank.y<0);
+ b.turn=.7;b.phase=Math.PI/2;habitat.time=2;view.update(habitat);
+ const glideMatrix=new THREE.Matrix4();meshes[1].getMatrixAt(0,glideMatrix);
+ assert.deepEqual(glideMatrix.elements,wingMatrix.elements);
+ b.flightState='flap';view.update(habitat);
+ const flapMatrix=new THREE.Matrix4();meshes[1].getMatrixAt(0,flapMatrix);
+ assert.ok(flapMatrix.elements.some((v,i)=>Math.abs(v-glideMatrix.elements[i])>.2));
+});
 test('clear weather hides precipitation; mixed enables both regional fronts',()=>{
  // Texture pixels are irrelevant to visibility; supply only the browser canvas boundary.
  const previousDocument=globalThis.document;

@@ -5,3 +5,11 @@
 @media(max-height:450px){aside{top:65px;bottom:auto;max-height:calc(100vh - 80px)}.intro{top:75px}footer{padding:12px 22px}}
 
 .intro{transition:opacity .3s}.intro.focused{opacity:0}
+
+header #cinema{pointer-events:auto;font-size:9px;margin-left:18px}.live{margin-left:auto}.intro h1{font-size:clamp(44px,4.6vw,66px)}aside{top:94px;max-height:calc(100vh - 190px);overflow:auto;scrollbar-width:thin;scrollbar-color:#566c50 #14291f}.camera-tabs{margin-bottom:12px}.range-label{margin-top:12px}input[type=range]{margin-bottom:16px}.cycle{display:flex;align-items:center;gap:8px;font-size:10px;margin:13px 0;color:#d3dec7}.cycle input{accent-color:#d5dda9}.quality-row{display:flex;align-items:center;gap:13px;font-size:10px}.quality-row select{flex:1;width:auto;padding:6px}.actions{margin-top:16px}.village-actions{margin-top:8px}#village-status{font-size:9px;color:#d5c797;text-align:center;line-height:1.4}.minimap{position:fixed;bottom:114px;left:38px;background:#142c24cf;border:1px solid #c7d1ad44;padding:8px;width:164px}.minimap canvas{width:146px;height:146px;display:block;cursor:crosshair}.minimap div{font-size:6px;letter-spacing:1px;margin-top:7px}.minimap span{font-size:9px;color:#c4d0b9;display:block;margin-top:5px}.clean aside,.clean .intro,.clean footer,.clean .minimap,.clean .brand,.clean .live{display:none}.clean header{background:none;justify-content:flex-end}.clean header #cinema{opacity:.7}#toast{z-index:10}
+@media(max-width:850px){.minimap{left:20px;width:128px;bottom:105px}.minimap canvas{width:110px;height:110px}.minimap div{font-size:5px}aside{max-height:calc(100vh - 190px)}}
+@media(max-width:560px){aside{bottom:85px;max-height:calc(100vh - 170px)}.minimap{left:14px;bottom:93px;width:105px}.minimap canvas{width:87px;height:87px}.minimap div{font-size:5px;letter-spacing:0}header #cinema{font-size:8px;padding:7px;margin-left:10px}.live{display:none}}
+@media(max-height:450px){aside{top:65px;max-height:calc(100vh - 120px)}.minimap{bottom:75px;width:110px}.minimap canvas{width:92px;height:92px}}
+
+@media(max-width:560px){aside{top:auto}}
+@media(max-height:450px){aside{top:65px;bottom:auto}}
