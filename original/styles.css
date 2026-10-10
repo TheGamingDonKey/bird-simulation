@@ -1,0 +1,238 @@
+:root {
+  color-scheme: dark;
+  --panel: rgba(18, 22, 24, 0.78);
+  --panel-strong: rgba(15, 17, 18, 0.9);
+  --border: rgba(233, 238, 226, 0.18);
+  --text: #f2f1e8;
+  --muted: #b8c0b2;
+  --accent: #f0b35a;
+  --accent-2: #76c6bb;
+  --danger: #d76b4d;
+  --shadow: rgba(0, 0, 0, 0.45);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #111719;
+  color: var(--text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.sim-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  min-height: 420px;
+  overflow: hidden;
+  background: #111719;
+}
+
+#simulationCanvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.hud {
+  position: absolute;
+  z-index: 5;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  box-shadow: 0 18px 45px var(--shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.hud-main {
+  top: 14px;
+  left: 14px;
+  width: min(392px, calc(100vw - 28px));
+  padding: 14px;
+  border-radius: 8px;
+}
+
+.hud-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mark {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background:
+    linear-gradient(135deg, transparent 34%, rgba(0, 0, 0, 0.25) 35% 42%, transparent 43%),
+    linear-gradient(145deg, #f0b35a, #76c6bb 55%, #c94f3f);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 720;
+}
+
+p {
+  margin: 2px 0 0;
+  min-height: 1.15rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+button {
+  min-height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.primary {
+  background: rgba(240, 179, 90, 0.26);
+  border-color: rgba(240, 179, 90, 0.5);
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+label span {
+  color: var(--text);
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+select {
+  min-height: 32px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: var(--panel-strong);
+  color: var(--text);
+  padding: 0 8px;
+}
+
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+.toggle-row label {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent-2);
+}
+
+.hud-stats {
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(72px, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hud-stats div {
+  display: grid;
+  gap: 2px;
+  min-height: 54px;
+  padding: 9px 12px;
+  background: var(--panel);
+}
+
+.hud-stats span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.hud-stats strong {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 740;
+}
+
+@media (max-width: 680px) {
+  .sim-shell {
+    min-height: 560px;
+  }
+
+  .hud-main {
+    top: 10px;
+    left: 10px;
+    width: calc(100vw - 20px);
+    padding: 12px;
+  }
+
+  .control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-stats {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+  }
+}

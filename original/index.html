@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bird Flock Village Simulation</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="sim-shell" aria-label="Bird flock village simulation">
+      <canvas id="simulationCanvas"></canvas>
+
+      <section class="hud hud-main" aria-label="Simulation controls">
+        <div class="hud-title">
+          <span class="mark" aria-hidden="true"></span>
+          <div>
+            <h1>Bird Simulation</h1>
+            <p id="statusLine">Initializing habitat</p>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="toggleRun" class="primary" type="button">Pause</button>
+          <button id="resetSim" type="button">Reset</button>
+          <button id="spawnStorm" type="button">Storm</button>
+        </div>
+
+        <div class="control-grid">
+          <label>
+            <span>Birds</span>
+            <input id="birdCount" type="range" min="40" max="320" value="180" step="10" />
+          </label>
+          <label>
+            <span>Weather</span>
+            <input id="weatherPower" type="range" min="0" max="100" value="58" step="1" />
+          </label>
+          <label>
+            <span>Time</span>
+            <input id="timeScale" type="range" min="25" max="220" value="100" step="5" />
+          </label>
+          <label>
+            <span>Camera</span>
+            <select id="cameraMode">
+              <option value="wide">Wide</option>
+              <option value="follow">Follow flock</option>
+              <option value="village">Village</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <label><input id="showWeather" type="checkbox" checked /> Weather map</label>
+          <label><input id="showTrails" type="checkbox" checked /> Flight trails</label>
+          <label><input id="slowVillage" type="checkbox" /> Quiet village</label>
+        </div>
+      </section>
+
+      <section class="hud hud-stats" aria-label="Simulation readouts">
+        <div>
+          <span>Flocks</span>
+          <strong id="flockReadout">0</strong>
+        </div>
+        <div>
+          <span>Weather</span>
+          <strong id="weatherReadout">Mixed</strong>
+        </div>
+        <div>
+          <span>FPS</span>
+          <strong id="fpsReadout">60</strong>
+        </div>
+      </section>
+    </main>
+
+    <script src="./simulation.js"></script>
+  </body>
+</html>

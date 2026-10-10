@@ -1,0 +1,13 @@
+{
+  "original_created_date": "2026-06-03",
+  "original_request_timestamp_utc": "2026-06-03T20:12:18.598Z",
+  "original_completed_timestamp_utc": "2026-06-03T20:33:47.570Z",
+  "original_format": "JavaScript Canvas browser simulation",
+  "upgrade_date": "2026-10-10",
+  "note": "Recovered original browser files, unchanged. The supplied Pygame summary does not match the recovered implementation. GitHub publication is new; historical commit dates are not fabricated.",
+  "sha256": {
+    "original/index.html": "db64a26bec6a6c9ca0b05b6dd113b3d6bbb0301ecd28058492005a237ba39881",
+    "original/simulation.js": "8b9ae029868713a52b7e6e486c79b457dc69a5937109fb5d1136cf31b4182ebe",
+    "original/styles.css": "9acc2cbe0dac8f7906275b41da0be1b6bdb35df00bf41f04fe1603f7d93ac715"
+  }
+}
