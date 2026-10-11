@@ -92,7 +92,7 @@ export class PlayerBird {
       else {
         this.x = this.perch.x; this.y = this.perch.y + .4; this.z = this.perch.z;
         this.vx = this.vy = this.vz = this.speed = 0; this.turn *= Math.exp(-dt * 6);
-        this.pitch *= Math.exp(-dt * 6); this.energy = clamp(this.energy + dt * .18, 0, 1);
+        this.yaw -= steering * dt * 1.4; this.pitch += (climbing * .7 - this.pitch) * (1 - Math.exp(-dt * 6)); this.energy = clamp(this.energy + dt * .18, 0, 1);
         this.flightState = 'perch'; return;
       }
     }

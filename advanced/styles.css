@@ -25,3 +25,14 @@ header #cinema{pointer-events:auto;font-size:9px;margin-left:18px}.live{margin-l
 
 @media(max-width:560px){.pilot-mode aside{max-height:calc(100dvh - 340px)}.pilot-mode .panel-title{position:sticky;top:0;background:#142c23;z-index:1}}
 @media(max-height:450px){.pilot-mode aside{max-height:calc(100dvh - 120px)}}
+
+.pilot-heading{gap:8px}.pilot-heading span{margin-right:auto}.pilot-tabs{display:flex;gap:6px;border-bottom:1px solid #d8e4be22;margin:10px 0;padding-bottom:7px}.pilot-tabs button{font-size:10px;padding:6px 12px}.pilot-tabs .selected{background:#cbdca7;color:#263c29}
+.family-status{display:flex;justify-content:space-between;align-items:center;font-size:11px;gap:10px}.family-status span{color:#e6ca88;font-size:10px}#family-objective{font-size:10px;color:#d4dec1;line-height:1.55;margin:10px 0}#egg-status{display:flex;gap:9px}.egg-card{flex:1;border:1px solid #dae3bf33;padding:8px;border-radius:3px;font-size:9px;line-height:1.7}.egg-card b{display:block;color:#e6ca88}.egg-card progress{width:100%;height:5px;accent-color:#cfdda7}#social-status{font-size:9px;color:#bacdaf;margin:9px 0}.family-actions{display:flex;gap:6px}.family-actions button{flex:1;font-size:10px;padding:8px 6px}.family-actions #care-bird{background:#cbdca7;color:#263c29}.flight-practice select{font-size:10px;padding:6px;width:auto;max-width:155px}.flight-practice span{font-size:6px}
+.pilot-mode #toast{bottom:auto;top:74px;max-width:calc(100vw - 28px);font-size:11px}
+@media(max-width:1050px){.pilot-mode .minimap{top:78px;bottom:auto}}
+@media(max-width:560px){#player-hud{max-height:calc(100dvh - 245px);overflow:auto}.pilot-mode aside{bottom:auto;top:68px;max-height:130px}.pilot-mode .minimap{top:68px}.pilot-heading button{font-size:8px;padding:6px}.family-actions button{font-size:9px}.flight-practice select{max-width:130px}.flight-practice span{font-size:5px}.flight-metrics{gap:8px}}
+@media(max-height:450px){#player-hud{max-height:calc(100dvh - 80px)}.pilot-mode aside{max-height:calc(100dvh - 120px)}}
+
+.pilot-mode footer{display:none}#player-hud{bottom:28px}
+@media(max-width:560px){#player-hud{bottom:16px}}
+@media(max-height:450px) and (min-width:561px){#player-hud{width:320px;max-height:calc(100dvh - 95px);bottom:12px}.flight-metrics meter{width:50px}}

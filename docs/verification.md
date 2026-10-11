@@ -33,3 +33,17 @@ Public repository: https://github.com/TheGamingDonKey/bird-simulation. See publi
 - Player controls advance at real-time speed while the environment time multiplier controls flock/weather/village simulation. Flight freezes while paused. It is assisted arcade flight; arbitrary building collisions and precise aerodynamics are outside this edition.
 
 Final release verification: `node --test tests/*.test.mjs` — 55 passed, zero failures. `node --check advanced/main.js` and `git diff --check` passed.
+
+## Nesting and first-person expansion — October 11, 2026
+
+- Final behavioral suite now includes76 passing tests: exact nest anchors and claimed/perched-only brooding, full harvesting/feeding/fledging cycle, inventory limits and source recharge, hungry-chick growth gating, cooldowns, pause/reset reference stability, view stages and reused meshes, local social range/energy/food receipts, companion expiry and object identity.
+- First-person regression checks eyes near the controlled bird, body hidden, heading/pitch followed, chase switching, and rising terrain clearance. Perched look controls change view without moving the landing anchor.
+- Live browser checks exercised home approach, claim, two eggs hatching, repeated food collection and return, inventory consumption and chick growth. Additional final visual checks below record fledging, social controls and responsive layouts.
+- User-facing dates are October11 in America/New_York. Earlier June3/October10 source snapshots remain preserved. Family progress is accelerated arcade behavior with no offline/save persistence.
+
+- Completed the actual UI family cycle: both home eggs hatched; two rounds of three carried meals were collected and distributed. Both chicks received three meals and reached stage fledged with age24. The public flight dashboard reported2fledged. Pausing preserved time395.6656 and all family values across checks.
+- Live social loop: gathered a meal, practiced beside the flock, greeted a bird, shared the meal (inventory1→0, friends1/companion1), and called20nearby birds. First-person flight climbed with W; live eye/controlled-bird coordinates remained close, and V returned the chase view.
+- Console inspection during the family/social loop returned no errors. Performance remains a per-machine/browser observation, not a cross-device guarantee.
+
+- Final responsive build:390x667 family HUD bounds x12..378,y303..651; observation panel y68..198. At844x390 family HUD x20..340,y83..378 with scrollable content. Neither viewport has horizontal document overflow. First-person mode, contextual buttons, practice selector and companion outline were checked in the final browser build.
+- Final checks:76 tests passed with zero failures; main module syntax and whitespace checks passed. Screenshot artifacts include the completed fledging cycle, first-person view and nursery view.

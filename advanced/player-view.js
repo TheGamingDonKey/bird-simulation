@@ -14,16 +14,17 @@ export function createPlayerView(THREE,scene){
  root.traverse(o=>{if(o.isMesh)o.castShadow=o.receiveShadow=true;});
  const targetMarker=new THREE.Mesh(new THREE.TorusGeometry(1.25,.065,5,32),new THREE.MeshBasicMaterial({color:'#e9da83',transparent:true,opacity:.9,depthWrite:false}));targetMarker.rotation.x=Math.PI/2;targetMarker.name='Nearest landing perch';scene.add(targetMarker);
  const direction=new THREE.Vector3(),destination=new THREE.Vector3(),look=new THREE.Vector3();let current;
- function update(player,active,nearest){
-  current=player;root.visible=active;targetMarker.visible=active&&!!nearest;root.position.set(player.x,player.y,player.z);
-  root.rotation.set(-player.pitch,player.yaw+Math.PI,player.turn*.38);
+ function update(player,active,nearest,firstPerson=false){
+  current=player;root.visible=active&&!firstPerson;targetMarker.visible=active&&!!nearest;root.position.set(player.x,player.y,player.z);
+  root.rotation.set(player.mode==='perched'?0:-player.pitch,player.yaw+Math.PI,player.turn*.38);
   const perched=player.mode==='perched',gliding=player.flightState==='glide'||player.mode==='landing';
   const flap=perched?-.3:gliding?.06:Math.sin(player.phase)*(.4+player.energy*.2);
   wings.forEach((wing,i)=>{wing.rotation.z=(i===0?-1:1)*flap;wing.scale.set((i===0?-1:1)*(perched?.17:1.1),1,perched?1.7:1.05);});
   if(nearest){const p=nearest.perch;targetMarker.position.set(p.x,p.y+.12,p.z);targetMarker.material.color.set(nearest.horizontalDistance<=24&&Math.abs(player.y-p.y-.4)<=18?'#b7edb0':'#e9bf73');targetMarker.scale.setScalar(1+Math.sin((player.time||0)*3)*.05);}
  }
- function updateCamera(camera,controls,dt,instant=false){
+ function updateCamera(camera,controls,dt,instant=false,viewpoint='chase'){
   const p=current;if(!p)return;direction.set(-Math.sin(p.yaw),Math.sin(p.pitch)*.25,-Math.cos(p.yaw)).normalize();
+  if(viewpoint==='first'){direction.set(-Math.sin(p.yaw)*Math.cos(p.pitch),Math.sin(p.pitch),-Math.cos(p.yaw)*Math.cos(p.pitch));destination.set(p.x,p.y+.25,p.z).addScaledVector(direction,.7);destination.y=Math.max(destination.y,Math.max(terrainHeight(destination.x,destination.z),-2.5)+.2);look.copy(destination).addScaledVector(direction,25);camera.position.copy(destination);camera.up.set(0,1,0);camera.lookAt(look);controls.target.copy(look);return;}
   if(p.mode==='perched'){destination.set(p.x+8,p.y+5,p.z+10);look.set(p.x,p.y+.5,p.z);}
   else{destination.set(p.x,p.y+3.8,p.z).addScaledVector(direction,-12);look.set(p.x,p.y+.7,p.z).addScaledVector(direction,7);}
   destination.y=Math.max(destination.y,Math.max(terrainHeight(destination.x,destination.z),-2.5)+2);

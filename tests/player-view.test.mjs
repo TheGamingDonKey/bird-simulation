@@ -26,3 +26,18 @@ test('perch guidance uses the same landing height and inclusive reach as flight 
  player.y=12.4;view.update(player,true,{perch,horizontalDistance:24});assert.equal(view.targetMarker.material.color.getHexString(),'b7edb0');
  assert.ok(Number.isFinite(view.targetMarker.scale.x));
 });
+
+test('first-person flight places eyes on the bird, follows pitch and hides its body',()=>{
+ const view=setup(),player=bird(),camera=new THREE.PerspectiveCamera(),controls={target:new THREE.Vector3()};
+ player.pitch=.4;view.update(player,true,null,true);view.updateCamera(camera,controls,.016,true,'first');
+ assert.equal(view.root.visible,false);assert.ok(camera.position.distanceTo(view.root.position)<2);
+ assert.ok(controls.target.y>camera.position.y);assert.ok(controls.target.z<camera.position.z);
+ view.update(player,true,null,false);view.updateCamera(camera,controls,.016,true,'chase');assert.equal(view.root.visible,true);assert.ok(camera.position.distanceTo(view.root.position)>8);
+});
+
+test('first-person eyes remain above rising ground ahead of the bird',async()=>{
+ const {terrainHeight}=await import('../advanced/terrain.js');const view=setup(),player=bird(),camera=new THREE.PerspectiveCamera(),controls={target:new THREE.Vector3()};
+ Object.assign(player,{x:6,z:-180,y:terrainHeight(6,-180)+1.2,yaw:-Math.PI/2,pitch:0});
+ view.update(player,true,null,true);view.updateCamera(camera,controls,.016,true,'first');
+ assert.ok(camera.position.y>=terrainHeight(camera.position.x,camera.position.z)+.15);assert.ok(controls.target.x>camera.position.x);
+});

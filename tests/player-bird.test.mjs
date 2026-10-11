@@ -113,3 +113,8 @@ test('reset and identical input replay deterministically; invalid or oversized t
   assert.deepEqual(structuredClone(a), structuredClone(b));
   a.setPerches([perches[1]]); assert.equal(a.nearestPerch().perch.id, 'tree-1');
 });
+
+test('perched birds can look around without leaving their exact landing anchor',()=>{
+ const p=new module.PlayerBird([{id:'nest',type:'tent',x:35,y:8,z:20}]);p.mode='perched';p.perch=p.perches[0];p.step(.1,{turn:1,pitch:-1});
+ assert.equal(p.mode,'perched');assert.equal(p.x,35);assert.equal(p.z,20);assert.equal(p.y,8.4);assert.ok(p.yaw<0);assert.ok(p.pitch<0);
+});

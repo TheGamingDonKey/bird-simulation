@@ -29,6 +29,18 @@ Eight deer, twelve rabbits and fourteen river fish wander, graze, drink, shelter
 
 Choose **Take control of a bird**. W/S or ↑/↓ climbs/dives; A/D or ←/→ steers; Space flaps; Shift glides; L lands/cancels/takes off; F chirps; P pauses. Focus the scene after using form controls. **Near a tree** and **Near a tent** make landing easy to learn. Exit flight or choose a habitat camera to return to observing.
 
+## Nesting and first-person expansion — October 11, 2026
+
+Version 4.0.0 adds a first-person camera for your own bird, three real-perch nests with two eggs each, a causal family cycle, foraging crowns and local flock friendships. Eggs hatch after twelve seconds of claimed-nest brooding; hungry chicks wait safely, and repeated feeding lets them grow and fledge after twenty-four nourished seconds. These are accelerated arcade timings.
+
+Choose **Nest & flock** in your bird dashboard. Practice travel can approach Home nest or a Foraging tree, or place you beside the flock. It moves your adult bird only; claiming, incubation, food collection, feeding and fledging still require gameplay. Carry up to three meals; foraging crowns regrow after five seconds.
+
+- V toggles first person/chase. W/S and A/D also let you look around while perched.
+- E performs the displayed nest/food action: claim, collect or feed. Stay perched in a claimed nest to brood.
+- F calls birds within fifty world units. B greets a bird within sixteen units into temporary companionship. G shares one carried meal, restores its energy and extends its stay.
+- Flight and family/social progress pause together. Family clocks use real time, independent of the environment speed slider. Reset starts the family story again; no session save is implemented.
+- Fledglings rise out of the nest and circle it as visible family birds. They remain separate from the 60–700 ambient-flock slider.
+
 ## Explore
 
 - Drag and scroll to orbit/zoom. Valley and Village frame the landscape; Flock flies alongside one species.
@@ -43,7 +55,7 @@ Choose **Take control of a bird**. W/S or ↑/↓ climbs/dives; A/D or ←/→ s
 
 ## Source map
 
-`advanced/player-bird.js` owns player flight and landing; `flight-input.js` translates keys and held buttons; `player-view.js` renders your bird and chase camera; `wildlife.js` owns animal behavior. `advanced/model.js` owns deterministic flocking, species, weather forces, food and predator state. `weather.js` owns shared geographic fronts; `villagers.js` owns independent village behavior. `navigation.js` handles camera movement, `atmosphere.js` renders sky and lighting, `minimap.js` draws the map, and `audio.js` synthesizes sound. `terrain.js` supplies shared ground heights. `world.js` builds and animates the landscape, people, fire and local weather. `bird-view.js` draws wings/body instances; `main.js` owns the renderer, camera and controls. `index.html` and `styles.css` contain the interface. `server.mjs` is a local-only static server.
+`nesting.js` owns eggs, food and chick growth; `nesting-view.js` renders their life stages; `bird-social.js` owns local calls and companion steering. `advanced/player-bird.js` owns player flight and landing; `flight-input.js` translates keys and held buttons; `player-view.js` renders your bird and chase camera; `wildlife.js` owns animal behavior. `advanced/model.js` owns deterministic flocking, species, weather forces, food and predator state. `weather.js` owns shared geographic fronts; `villagers.js` owns independent village behavior. `navigation.js` handles camera movement, `atmosphere.js` renders sky and lighting, `minimap.js` draws the map, and `audio.js` synthesizes sound. `terrain.js` supplies shared ground heights. `world.js` builds and animates the landscape, people, fire and local weather. `bird-view.js` draws wings/body instances; `main.js` owns the renderer, camera and controls. `index.html` and `styles.css` contain the interface. `server.mjs` is a local-only static server.
 
 Run behavioral tests with `node --test tests/*.test.mjs`. These check reproducibility, finite/bounded motion, terrain clearance, and interaction effects. Browser visual checks are documented in `docs/verification.md` when complete.
 
@@ -56,6 +68,9 @@ Three.js and OrbitControls retain their upstream MIT license; see `advanced/vend
 - [Original source archive](https://github.com/TheGamingDonKey/bird-simulation/commit/929e269ea552c62e8abc09bbef96e72afed40c3a): June 3 source, published October 10.
 - [First advanced edition](https://github.com/TheGamingDonKey/bird-simulation/commit/f0f29eae24c40ee3ef461f7c33a82a488866d997): October 10.
 - [Living world expansion](https://github.com/TheGamingDonKey/bird-simulation/commit/7823c6317091f873d80ce0e65daff7224e2075b1): October 10.
-- Current main: playable bird and wildlife expansion, October 10.
+- [Playable bird and wildlife expansion](https://github.com/TheGamingDonKey/bird-simulation/commit/227bdad504f17db083c9d5c68c11896df73c23bf): October 10.
+- Current main: nesting and first-person expansion, October 11.
 
-![Your bird perched on a tent roof](playable-bird-preview.jpg)
+![Two chicks in their tent-ridge nest](nursery-preview.jpg)
+
+[First-person preview](first-person-preview.jpg) · [Family dashboard](nesting-preview.jpg) · [Completed fledging cycle](fledging-preview.jpg)
