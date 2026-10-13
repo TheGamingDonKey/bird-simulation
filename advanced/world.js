@@ -291,10 +291,19 @@ export function createWorld(THREE, scene) {
   // High, thin ivory banks stay behind the flock. Unlit color avoids stone-like dark facets.
   const cloudMaterial=new THREE.MeshBasicMaterial({color:0xf2f1e6,transparent:true,opacity:.48,depthWrite:false});
   const clouds=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,2),cloudMaterial,48);root.add(clouds);
-  const cloudData=[];
+  clouds.name='Drifting cloud banks';clouds.frustumCulled=false;
+  const cloudFade=new THREE.InstancedBufferAttribute(new Float32Array(48).fill(1),1);
+  clouds.geometry.setAttribute('cloudFade',cloudFade);
+  cloudMaterial.onBeforeCompile=shader=>{
+    shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nattribute float cloudFade;\nvarying float vCloudFade;').replace('#include <begin_vertex>','#include <begin_vertex>\nvCloudFade = cloudFade;');
+    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vCloudFade;').replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.a *= vCloudFade;');
+  };
+  cloudMaterial.customProgramCacheKey=()=> 'drifting-cloud-fade-v1';
+  const cloudData=[],cloudBanks=[];
   for(let bank=0;bank<12;bank++){
     const x=(rand()-.5)*400,z=-185+rand()*195,y=106+rand()*29;
-    for(let j=0;j<4;j++){cloudData.push({x:x+(rand()-.5)*23,y:y+rand()*2,z:z+(rand()-.5)*10,sx:5+rand()*6,sy:1.5+rand()*1.7,sz:4+rand()*4,phase:rand()*6.28});}
+    cloudBanks.push({x,z,initialX:x,initialZ:z});
+    for(let j=0;j<4;j++){cloudData.push({bank,x:(rand()-.5)*23,y:y+rand()*2,z:(rand()-.5)*10,sx:5+rand()*6,sy:1.5+rand()*1.7,sz:4+rand()*4,phase:rand()*6.28});}
   }
   const haze=[];
   for(let i=0;i<22;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:soft,color:0xd9e0d8,opacity:.065,transparent:true,depthWrite:false}));s.position.set((rand()-.5)*130,6+rand()*9,(rand()-.5)*300);s.scale.set(72+rand()*70,13+rand()*10,1);root.add(s);haze.push({sprite:s,x:s.position.x,z:s.position.z,phase:rand()*6.28});}
@@ -317,7 +326,7 @@ export function createWorld(THREE, scene) {
   const lightning=mesh(new THREE.CylinderGeometry(.25,.4,48,4),lightningMaterial);lightning.position.set(121,35,-8);
 
   let lastTime = 0;
-  function animate(time, options={}) {
+  function animate(time, options={},dt=0) {
     const mode=options.weather||'mixed';
     const wind=options.wind; const wx=typeof wind==='number'?wind:(wind?.x??3), wz=typeof wind==='object'?(wind?.z??0):0;
     const daylight=options.daylight??1;
@@ -339,7 +348,20 @@ export function createWorld(THREE, scene) {
     cloudMaterial.color.setHex(storm?0xc3d1d2:0xf2f1e6);
     breezeUniforms.valleyTime.value=time; breezeUniforms.valleyBreeze.value=Math.min(2.4,.2+Math.hypot(wx,wz)*.12);
     for(const flap of tentFlaps)flap.pivot.rotation.y=flap.side*(.4+Math.sin(time*3.7+flap.phase)*.16*breezeUniforms.valleyBreeze.value);
-    for(let i=0;i<cloudData.length;i++){const c=cloudData[i];const x=((c.x+time*wx*.12+230)%460+460)%460-230;const z=((c.z+time*wz*.12+220)%440+440)%440-220;instance(clouds,i,x,c.y+Math.sin(time*.035+c.phase)*1.1,z,c.sx,c.sy,c.sz);}
+    // Integrate the current wind; multiplying it by total time retroactively moves clouds on every gust.
+    // Recycle entire banks beyond the valley, after they have completely faded out.
+    for(const bank of cloudBanks){
+      bank.x=((bank.x+wx*.12*dt+320)%640+640)%640-320;
+      bank.z=((bank.z+wz*.12*dt+320)%640+640)%640-320;
+      const edge=Math.max(Math.abs(bank.x),Math.abs(bank.z));
+      const t=Math.max(0,Math.min(1,(edge-250)/50));bank.fade=1-t*t*(3-2*t);
+    }
+    for(let i=0;i<cloudData.length;i++){
+      const c=cloudData[i],bank=cloudBanks[c.bank];
+      instance(clouds,i,bank.x+c.x,c.y+Math.sin(time*.035+c.phase)*1.1,bank.z+c.z,c.sx,c.sy,c.sz);
+      cloudFade.setX(i,bank.fade);
+    }
+    cloudFade.needsUpdate=true;
     clouds.count=cloudData.length;clouds.instanceMatrix.needsUpdate=true;
     const fogFronts=activeFronts?.filter(f=>f.type==='fog'&&f.intensity>.02)??[];
     for(let i=0;i<haze.length;i++){const h=haze[i],f=fogFronts[i%fogFronts.length];
@@ -382,7 +404,7 @@ export function createWorld(THREE, scene) {
     root, terrain:land, villageCenter, terrainHeight, villagers:village.villagers, village, perches, wildlife:wildlifeSimulation.animals, wildlifeSimulation,
     interact(x,z,kind='gather') {return village.interact(x,z,kind);},
     scare(x,z) {return village.scare(x,z);},
-    reset() {village.reset();wildlifeSimulation.reset();lastTime=0;animate(0,{weather:'mixed',daylight:1});},
-    update(dt,time,options={}) { if (!(dt>0)) return; village.step(dt,options);wildlifeSimulation.step(dt,options); lastTime=Number.isFinite(time)?time:lastTime+dt; animate(lastTime,options); },
+    reset() {village.reset();wildlifeSimulation.reset();for(const bank of cloudBanks){bank.x=bank.initialX;bank.z=bank.initialZ;}lastTime=0;animate(0,{weather:'mixed',daylight:1});},
+    update(dt,time,options={}) { if (!Number.isFinite(dt)||!(dt>0)) return; village.step(dt,options);wildlifeSimulation.step(dt,options); lastTime=Number.isFinite(time)?time:lastTime+dt; animate(lastTime,options,dt); },
   };
 }

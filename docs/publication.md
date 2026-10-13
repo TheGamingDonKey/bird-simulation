@@ -7,3 +7,5 @@ Original creation: June 3, 2026. First advanced edition and living world expansi
 Playable bird and wildlife expansion: October 10, 2026, version 3.0.0. Published as a further main-branch commit, preserving all earlier dated snapshots.
 
 Nesting and first-person expansion: October 11, 2026, version 4.0.0. New main-branch snapshot preserves the June 3 source and October 10 editions. Publication uses the actual upload time.
+
+Cloud motion fix: October 12, 2026, version 4.0.1. Corrects wind integration and coherent, faded cloud-bank recycling; keeps earlier sources and snapshots intact.

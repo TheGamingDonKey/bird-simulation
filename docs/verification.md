@@ -47,3 +47,10 @@ Final release verification: `node --test tests/*.test.mjs` — 55 passed, zero f
 
 - Final responsive build:390x667 family HUD bounds x12..378,y303..651; observation panel y68..198. At844x390 family HUD x20..340,y83..378 with scrollable content. Neither viewport has horizontal document overflow. First-person mode, contextual buttons, practice selector and companion outline were checked in the final browser build.
 - Final checks:76 tests passed with zero failures; main module syntax and whitespace checks passed. Screenshot artifacts include the completed fledging cycle, first-person view and nursery view.
+
+## Cloud motion fix — October 12, 2026
+
+- Reproduced a 60.56-unit cloud displacement in a 40 ms frame at time 1200 when wind changed. The renderer multiplied the new wind by total elapsed time, retroactively changing position. It also wrapped each cloud piece independently and retained static instance culling bounds.
+- Cloud-bank centers now integrate wind using the actual simulation timestep. Bank pieces keep their relative positions, share smooth edge opacity, and recycle together at +/-320 while fully transparent outside +/-300. Moving clouds disable static frustum culling. Pause and reset preserve/replay cloud positions, and invalid timesteps are ignored.
+- Three regression tests failed before the correction and pass afterward: late gust continuity; timestep/paused/reset behavior; and real edge recycling with coherent positions and zero opacity on both sides of each wrap.
+- Full behavioral suite: 79 passed, zero failed. Live browser compiled the cloud shader with no console errors, rendered the clouds, and exercised Thunderstorm at 3x environment speed.

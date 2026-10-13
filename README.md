@@ -43,6 +43,8 @@ Choose **Nest & flock** in your bird dashboard. Practice travel can approach Hom
 
 ## Explore
 
+**Cloud motion fix — October 12, 2026 (4.0.1):** Gusts now change cloud velocity without recalculating previous travel. Whole cloud banks drift together and fade out before recycling beyond the valley. Their moving instance bounds no longer cause abrupt visibility changes.
+
 - Drag and scroll to orbit/zoom. Valley and Village frame the landscape; Flock flies alongside one species.
 - Change population (60–700), time speed, time of day, and the weather. Living mosaic has simultaneous regional fronts.
 - Place food, then click the valley. Birds gather at that location.
